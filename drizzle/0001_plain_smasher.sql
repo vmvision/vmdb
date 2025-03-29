@@ -1,0 +1,2 @@
+ALTER TABLE `category` ADD `region_id` varchar(255);--> statement-breakpoint
+ALTER TABLE `category` ADD CONSTRAINT `category_region_id_region_id_fk` FOREIGN KEY (`region_id`) REFERENCES `region`(`id`) ON DELETE set null ON UPDATE cascade;
