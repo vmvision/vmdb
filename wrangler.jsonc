@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "vmdb",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-03-29",
+  // "compatibility_flags": [
+  //   "nodejs_compat"
+  // ],
+  "vars": {
+    "TIDB_URL": "mysql://"
+  }
+}

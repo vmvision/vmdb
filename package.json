@@ -2,7 +2,9 @@
   "name": "vmdb",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch src/runtime/node.ts",
+    "dev:worked": "wrangler dev",
+    "deploy:worked": "wrangler deploy --minify",
     "db:generate": "dotenv drizzle-kit generate",
     "db:introspect": "dotenv drizzle-kit introspect",
     "db:push": "dotenv drizzle-kit push",
@@ -25,10 +27,12 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@cloudflare/workers-types": "^4.20250327.0",
     "@types/node": "^20.11.17",
     "dotenv": "^16.4.7",
     "dotenv-cli": "^8.0.0",
     "drizzle-kit": "^0.30.6",
-    "tsx": "^4.7.1"
+    "tsx": "^4.7.1",
+    "wrangler": "^4.6.0"
   }
 }

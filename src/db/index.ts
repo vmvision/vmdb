@@ -1,7 +1,18 @@
 import { drizzle } from "drizzle-orm/tidb-serverless";
 import * as schema from "./schema";
-const db = drizzle({ connection: { url: process.env.TIDB_URL }, schema });
 
-export type DataBase = typeof db;
+export type DataBase = ReturnType<typeof drizzle<typeof schema>>;
 
-export default db;
+const globalForDB = globalThis as unknown as {
+	db: DataBase | undefined;
+};
+
+const getDb = (url: string) => {
+	if (globalForDB.db) {
+		return globalForDB.db;
+	}
+	globalForDB.db = drizzle({ connection: { url }, schema });
+	return globalForDB.db;
+};
+
+export default getDb;
