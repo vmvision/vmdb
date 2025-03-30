@@ -36,13 +36,13 @@ const app = appFactory
 			const db = c.get("db");
 			const { input, mid } = c.req.valid("query");
 			const model = await db.query.model.findMany({
-				where: (t, { eq, and, like }) =>
+				where: (t, { eq, and, ilike }) =>
 					and(
-						like(t.name, `%${input}%`),
+						ilike(t.name, `%${input}%`),
 						mid ? eq(t.merchantKey, mid) : undefined,
 					),
 				with: {
-					// prices: true,
+					prices: true,
 					region: true,
 				},
 			});
