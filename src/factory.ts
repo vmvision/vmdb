@@ -1,13 +1,15 @@
 import { createFactory } from "hono/factory";
 import getDb, { type DataBase } from "./db";
 import { env, getRuntimeKey } from "hono/adapter";
+import { cache } from "hono/cache";
 
 export type Env = {
 	Variables: {
 		db: DataBase;
 	};
 	Bindings: {
-		TIDB_URL: string;
+		DATABASE_URL: string;
+		HYPERDRIVE?: Hyperdrive;
 	};
 };
 
@@ -16,9 +18,17 @@ export type Env = {
  */
 const appFactory = createFactory<Env>({
 	initApp: (app) => {
+		if (getRuntimeKey() === "workerd") {
+			app.use(
+				cache({
+					cacheName: "vmdb",
+					cacheControl: "max-age=3600",
+				}),
+			);
+		}
 		app.use(async (c, next) => {
-			const { TIDB_URL } = env<Env["Bindings"]>(c);
-			c.set("db", getDb(TIDB_URL));
+			const { DATABASE_URL, HYPERDRIVE } = env<Env["Bindings"]>(c);
+			c.set("db", getDb(HYPERDRIVE?.connectionString ?? DATABASE_URL));
 			await next();
 		});
 	},

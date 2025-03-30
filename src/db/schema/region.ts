@@ -1,18 +1,12 @@
 import { relations } from "drizzle-orm";
-import {
-	double,
-	index,
-	int,
-	mysqlTable,
-	varchar,
-	type AnyMySqlColumn,
-} from "drizzle-orm/mysql-core";
+import { pgTable, varchar, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { model } from "./model";
 
-export const region = mysqlTable("region", {
-	id: varchar("id", { length: 255 }).primaryKey(),
+export const region = pgTable("region", {
+	key: varchar("key", { length: 255 }).primaryKey(),
 	name: varchar("name", { length: 255 }).notNull(),
-	countryId: varchar("country", { length: 255 }).references(
-		(): AnyMySqlColumn => region.id,
+	countryKey: varchar("country_key", { length: 255 }).references(
+		(): AnyPgColumn => region.key,
 		{
 			onDelete: "set null",
 			onUpdate: "cascade",
@@ -20,9 +14,10 @@ export const region = mysqlTable("region", {
 	),
 });
 
-export const regionRelation = relations(region, ({ one }) => ({
+export const regionRelation = relations(region, ({ one, many }) => ({
 	country: one(region, {
-		fields: [region.countryId],
-		references: [region.id],
+		fields: [region.countryKey],
+		references: [region.key],
 	}),
+	models: many(model),
 }));

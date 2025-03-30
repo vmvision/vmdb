@@ -1,22 +1,22 @@
 import { relations } from "drizzle-orm";
 import {
-	double,
-	index,
-	int,
-	mysqlTable,
+	serial,
+	pgTable,
 	varchar,
-	type AnyMySqlColumn,
-} from "drizzle-orm/mysql-core";
+	decimal,
+	integer,
+} from "drizzle-orm/pg-core";
+
 import { model } from "./model";
 
-export const price = mysqlTable("price", {
-	id: int("id").autoincrement().primaryKey(),
+export const price = pgTable("price", {
+	id: serial("id").primaryKey(),
 	cycle: varchar("cycle", { length: 255, enum: ["monthly", "yearly"] })
 		.default("monthly")
 		.notNull(),
-	amount: double("amount").notNull(),
+	amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
 	unit: varchar("unit", { length: 255 }).default("USD").notNull(),
-	modelId: int("model_id")
+	modelId: integer("model_id")
 		.references(() => model.id, {
 			onDelete: "cascade",
 			onUpdate: "cascade",

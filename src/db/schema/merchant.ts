@@ -1,11 +1,12 @@
 import { relations } from "drizzle-orm";
-import { mysqlTable, varchar } from "drizzle-orm/mysql-core";
-import { category } from "./category";
-import { model } from "./model";
+import { serial, pgTable, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-export const merchant = mysqlTable("merchant", {
-	id: varchar("id", { length: 255 }).primaryKey(),
+import { category } from "./category";
+import { model } from "./model";
+
+export const merchant = pgTable("merchant", {
+	key: varchar("key", { length: 255 }).primaryKey(),
 	name: varchar("name", { length: 255 }).notNull(),
 	website: varchar("website", { length: 255 }),
 });

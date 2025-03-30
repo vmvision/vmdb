@@ -3,10 +3,10 @@
   "name": "vmdb",
   "main": "src/index.ts",
   "compatibility_date": "2025-03-29",
-  // "compatibility_flags": [
-  //   "nodejs_compat"
-  // ],
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "vars": {
-    "TIDB_URL": "mysql://"
+    "DATABASE_URL": "postgresql://"
   }
 }

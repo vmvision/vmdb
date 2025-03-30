@@ -1,49 +1,52 @@
-import { relations } from "drizzle-orm";
-import { index, int, mysqlTable, varchar } from "drizzle-orm/mysql-core";
+import { relations, sql } from "drizzle-orm";
+import { serial, integer, pgTable, varchar, index } from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+
 import { merchant } from "./merchant";
 import { category } from "./category";
 import { region } from "./region";
 import { price } from "./price";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-export const model = mysqlTable(
+export const model = pgTable(
 	"model",
 	{
-		id: int("id").autoincrement().primaryKey(),
-		name: varchar("name", { length: 255 }).notNull(),
+		id: serial("id").primaryKey(),
+		name: varchar("name").notNull(),
 
-		merchantId: varchar("merchant_id", { length: 255 })
-			.references(() => merchant.id, {
+		merchantKey: varchar("merchant_key")
+			.references(() => merchant.key, {
 				onDelete: "cascade",
 				onUpdate: "cascade",
 			})
 			.notNull(),
-		categoryId: int("category_id").references(() => category.id, {
+		categoryId: integer("category_id").references(() => category.id, {
 			onDelete: "set null",
 			onUpdate: "cascade",
 		}),
 
-		cpu: varchar("cpu", { length: 255 }),
-		gpu: varchar("gpu", { length: 255 }),
-		core: int("core"),
-		memory: int("memory"),
-		storage: int("storage"),
-		bandwidth: int("bandwidth"),
-		regionId: varchar("region_id", { length: 255 }).references(
-			() => region.id,
-			{
-				onDelete: "set null",
-				onUpdate: "cascade",
-			},
-		),
+		cpu: varchar("cpu"),
+		gpu: varchar("gpu"),
+		core: integer("core"),
+		memory: integer("memory"),
+		storage: integer("storage"),
+		bandwidth: integer("bandwidth"),
+		regionId: varchar("region_key").references(() => region.key, {
+			onDelete: "set null",
+			onUpdate: "cascade",
+		}),
 	},
-	(t) => [index("idx_name").on(t.name)],
+	(t) => [
+		index("search_idx_model_name").using(
+			"gin",
+			sql`to_tsvector('english', ${t.name})`,
+		),
+	],
 );
 
 export const modelRelation = relations(model, ({ one, many }) => ({
 	merchant: one(merchant, {
-		fields: [model.merchantId],
-		references: [merchant.id],
+		fields: [model.merchantKey],
+		references: [merchant.key],
 	}),
 	category: one(category, {
 		fields: [model.categoryId],
@@ -51,7 +54,7 @@ export const modelRelation = relations(model, ({ one, many }) => ({
 	}),
 	region: one(region, {
 		fields: [model.regionId],
-		references: [region.id],
+		references: [region.key],
 	}),
 	prices: many(price),
 }));

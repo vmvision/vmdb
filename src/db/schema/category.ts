@@ -1,42 +1,43 @@
-import { relations } from "drizzle-orm";
-import {
-	index,
-	int,
-	mysqlTable,
-	varchar,
-} from "drizzle-orm/mysql-core";
+import { relations, sql } from "drizzle-orm";
+import { index, pgTable, serial, varchar } from "drizzle-orm/pg-core";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+
 import { region } from "./region";
 import { merchant } from "./merchant";
 import { model } from "./model";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
-export const category = mysqlTable(
+export const category = pgTable(
 	"category",
 	{
-		id: int("id").autoincrement().primaryKey(),
+		id: serial("id").primaryKey(),
 		name: varchar("name", { length: 255 }).notNull(),
 
-		regionId: varchar("region_id", { length: 255 }).references(
-			() => region.id,
+		regionKey: varchar("region_key", { length: 255 }).references(
+			() => region.key,
 			{
 				onDelete: "set null",
 				onUpdate: "cascade",
 			},
 		),
-		merchantId: varchar("merchant_id", { length: 255 })
-			.references(() => merchant.id, {
+		merchantKey: varchar("merchant_key", { length: 255 })
+			.references(() => merchant.key, {
 				onDelete: "cascade",
 				onUpdate: "cascade",
 			})
 			.notNull(),
 	},
-	(t) => [index("idx_name").on(t.name)],
+	(t) => [
+		index("search_idx_category_name").using(
+			"gin",
+			sql`to_tsvector('english', ${t.name})`,
+		),
+	],
 );
 
 export const categoryRelation = relations(category, ({ one, many }) => ({
 	merchant: one(merchant, {
-		fields: [category.merchantId],
-		references: [merchant.id],
+		fields: [category.merchantKey],
+		references: [merchant.key],
 	}),
 	models: many(model),
 }));
